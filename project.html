@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Arman's project portfolio showcasing web development and creative projects.">
+    <title>Projects | Arman</title>
+    
+    <!-- Fonts (Synced with Dark Brutalism theme) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Grotesk:wght@300;400;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#050505',
+                        surface: '#121212',
+                        accent: '#FF4400', // Vermilion Orange
+                        textMain: '#F3F4F6',
+                        textMuted: '#9CA3AF'
+                    },
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* --- Core Reset & Custom Scrollbar --- */
+        ::selection {
+            background: #FF4400;
+            color: #050505;
+        }
+        
+        body { 
+            background-color: #050505; 
+            color: #F3F4F6; 
+            overflow: hidden; /* Lock scroll for fullscreen carousel */
+            margin: 0;
+            padding: 0;
+            cursor: none; /* Custom cursor */
+        }
+
+        @media (max-width: 768px) {
+            body { cursor: auto; }
+        }
+
+        /* --- Cyber Grid & Background Details --- */
+        .noise-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 50; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+
+        /* --- Custom Cursor --- */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        .cursor-dot {
+            width: 6px; height: 6px; background-color: #FF4400;
+        }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(255, 68, 0, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s; mix-blend-mode: difference;
+        }
+        @media (max-width: 768px) {
+            .cursor-dot, .cursor-outline { display: none; }
+        }
+
+        /* --- Floating Nav --- */
+        .floating-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(18, 18, 18, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Carousel Main Layout --- */
+        .carousel { width: 100vw; height: 100vh; overflow: hidden; position: relative; z-index: 10;}
+        .carousel .list { display: flex; width: 100%; height: 100%; position: relative; }
+        .carousel .list .item { width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.5s ease-in-out; pointer-events: none; z-index: 0; }
+        .carousel .list .item.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .carousel .list .item img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4) grayscale(20%); transition: filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 5s ease; }
+        .carousel .list .item.active img { transform: scale(1.05); } /* Subtle zoom on active */
+        .carousel .list .item:hover img { filter: brightness(0.6) grayscale(0%); }
+
+        /* Click Overlay Button (Brutalist style) */
+        .carousel .list .item .overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            color: #050505; text-align: center; font-family: 'Space Grotesk', monospace; font-size: 0.9rem; font-weight: 600;
+            background: #FF4400; padding: 1rem 2.5rem; border-radius: 99px;
+            opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(255, 68, 0, 0.3);
+            white-space: nowrap;
+        }
+        .carousel .list .item a:hover .overlay {
+            opacity: 1; transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* --- Content Box Styling (Bento Glass style) --- */
+        .carousel .list .item .content {
+            position: absolute; top: 25%; left: 8%; width: 50%; max-width: 45rem;
+            padding: 2.5rem; background: rgba(18, 18, 18, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid #FF4400; border-radius: 0 1rem 1rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: translateX(-30px); opacity: 0; transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+        
+        .carousel .list .item.active .content { transform: translateX(0); opacity: 1; }
+
+        .carousel .list .item .content .author { font-family: 'Space Grotesk', monospace; color: #FF4400; letter-spacing: 3px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 1rem; display: block; }
+        .carousel .list .item .content .title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 5vw, 4.5rem); color: white; line-height: 1; text-transform: uppercase; letter-spacing: -1px; }
+        
+        /* --- Thumbnails (Desktop) --- */
+        .thumbnails {
+            position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 1rem; z-index: 20; max-width: 90vw; overflow-x: auto; padding: 1rem;
+        }
+        .thumbnails::-webkit-scrollbar { display: none; }
+
+        .thumbnails .thumbnail-item {
+            width: 100px; height: 140px; flex-shrink: 0; cursor: pointer; opacity: 0.5;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden;
+        }
+        
+        .thumbnails .thumbnail-item.active { opacity: 1; transform: translateY(-10px); border-color: #FF4400; box-shadow: 0 10px 20px rgba(255, 68, 0, 0.2); }
+        .thumbnails .thumbnail-item:hover { opacity: 0.8; }
+        
+        .thumbnails .thumbnail-item img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- Arrows --- */
+        .arrows { position: absolute; top: 75%; right: 5%; display: flex; gap: 1rem; z-index: 20; }
+        .arrows button {
+            width: 50px; height: 50px; border-radius: 50%; background: rgba(18, 18, 18, 0.5);
+            border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 1.2rem;
+            cursor: pointer; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
+        }
+        .arrows button:hover { background: #FF4400; border-color: #FF4400; color: #050505; transform: scale(1.1); }
+
+        /* =========================================
+           MOBILE & TABLET OPTIMIZATIONS 
+           ========================================= */
+        @media (max-width: 768px) {
+            .carousel .list .item .content { 
+                width: 100%; max-width: 100%; left: 0; top: auto; bottom: 0;
+                padding: 2rem 1.5rem 6rem 1.5rem; 
+                background: linear-gradient(to top, rgba(5,5,5, 1) 20%, rgba(5,5,5, 0.8) 80%, transparent 100%);
+                backdrop-filter: none; border: none; border-radius: 0; box-shadow: none; border-left: none;
+                transform: translateY(30px);
+            }
+
+            .carousel .list .item.active .content { transform: translateY(0); opacity: 1; }
+            .carousel .list .item .content .title { font-size: 2.5rem; margin-bottom: 0.5rem; }
+            
+            .carousel .list .item .overlay {
+                font-size: 0.8rem; padding: 1rem 2rem; width: auto; top: 40%;
+                background: rgba(18,18,18,0.8); color: #FF4400; border: 1px solid #FF4400; backdrop-filter: blur(5px);
+            }
+            .carousel .list .item.active .overlay { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+            .thumbnails { display: none; }
+            
+            .arrows { top: auto; bottom: 1.5rem; right: 1.5rem; gap: 10px; }
+            .arrows button { width: 45px; height: 45px; background: rgba(18,18,18,0.8); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent selection:text-base relative">
+
+    <!-- Texture, Global Grid & Ambient Lights -->
+    <div class="fixed inset-0 z-0 pointer-events-none bg-grid opacity-60"></div>
+    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-accent/5 rounded-full blur-[150px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-white/5 rounded-full blur-[150px] pointer-events-none z-0"></div>
+    <div class="noise-bg"></div>
+    
+    <!-- Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Navigation (Synced with index.html) -->
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-40 rounded-full floating-nav px-6 py-3 lg:py-4 flex justify-between items-center">
+        <a href="index.html" class="font-display font-bold text-xl tracking-wide text-white hover:text-accent transition-colors magnetic-el">
+            ARMAN<span class="text-accent">.</span>
+        </a>
+        
+        <!-- Desktop Links -->
+        <div class="hidden md:flex gap-8 items-center font-mono text-xs lg:text-sm uppercase tracking-widest text-textMuted">
+            <a href="index.html" class="hover:text-white transition-colors magnetic-el">Home</a>
+            <a href="project.html" class="text-white border-b border-accent pb-1 magnetic-el">Work</a>
+            <a href="about.html" class="hover:text-white transition-colors magnetic-el">About</a>
+            <a href="artwork.html" class="hover:text-white transition-colors magnetic-el">Artwork</a>
+        </div>
+
+        <a href="contacts.html" class="hidden md:inline-block px-5 py-2.5 bg-white text-base font-mono text-xs lg:text-sm font-bold rounded-full hover:bg-accent hover:text-white transition-all magnetic-el">
+            LET'S TALK
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="md:hidden text-white text-xl p-2" id="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-base z-50 transform translate-x-full transition-transform duration-500 flex flex-col justify-center items-center gap-8">
+        <button id="close-menu" class="absolute top-8 right-8 text-white text-3xl"><i class="fas fa-times"></i></button>
+        <a href="index.html" class="font-display text-4xl text-white hover:text-accent mobile-link">Home</a>
+        <a href="project.html" class="font-display text-4xl text-accent mobile-link">Work</a>
+        <a href="about.html" class="font-display text-4xl text-white hover:text-accent mobile-link">About</a>
+        <a href="contacts.html" class="font-display text-4xl text-white hover:text-accent mobile-link">Contact</a>
+    </div>
+
+    <!-- Project Carousel -->
+    <main class="carousel" role="region" aria-label="Project carousel">
+        <div class="list">
+            <!-- Project 1 -->
+            <div class="item active" data-index="0">
+                <a href="https://abc-gardenn.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="abc-garden.jpg" alt="ABC Garden project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=ABC+Garden'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 01</span>
+                    <div class="title">ABC Garden</div>
+                </div>
+            </div>
+            
+            <!-- Project 2 -->
+            <div class="item" data-index="1">
+                <a href="https://math-guru.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="math-guru.jpg" alt="Math Guru project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Math+Guru'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 02</span>
+                    <div class="title">Math Guru</div>
+                </div>
+            </div>
+
+            <!-- Project 3 -->
+            <div class="item" data-index="2">
+                <a href="https://multiply-mate.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="multiply-mate.jpg" alt="Multiply Mate project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Multiply+Mate'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 03</span>
+                    <div class="title">Multiply Mate</div>
+                </div>
+            </div>
+
+            <!-- Project 4 -->
+            <div class="item" data-index="3">
+                <a href="https://bio-quizzed.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="bio-quizzed.jpg" alt="Bio Quizzed project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Bio+Quizzed'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 04</span>
+                    <div class="title">Bio Quizzed</div>
+                </div>
+            </div>
+
+            <!-- Project 5 -->
+            <div class="item" data-index="4">
+                <a href="https://word-huntt.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="word-hunt.jpg" alt="Word Hunt project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Word+Hunt'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 05</span>
+                    <div class="title">Word Hunt</div>
+                </div>
+            </div>
+
+            <!-- Project 6 -->
+            <div class="item" data-index="5">
+                <a href="https://recall-race.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="recall-race.jpg" alt="Recall Race project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Recall+Race'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 06</span>
+                    <div class="title">Recall Race</div>
+                </div>
+            </div>
+
+            <!-- Project 7 -->
+            <div class="item" data-index="6">
+                <a href="https://tile-shuffle.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="tile-shuffle.jpg" alt="Tile Shuffle project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Tile+Shuffle'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 07</span>
+                    <div class="title">Tile Shuffle</div>
+                </div>
+            </div>
+
+            <!-- Project 8 -->
+            <div class="item" data-index="7">
+                <a href="https://word-scrambleee.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="word-scramble.jpg" alt="Word Scramble project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=Word+Scramble'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 08</span>
+                    <div class="title">Word Scramble</div>
+                </div>
+            </div>
+
+            <!-- Project 9 -->
+            <div class="item" data-index="8">
+                <a href="https://riddlerush.netlify.app" target="_blank" rel="noopener noreferrer">
+                    <img src="riddlerush.png" alt="RiddleRush project" onerror="this.src='https://placehold.co/1920x1080/121212/FF4400?text=RiddleRush'">
+                    <div class="overlay">LAUNCH PROJECT <i class="fas fa-arrow-right ml-2"></i></div>
+                </a>
+                <div class="content">
+                    <span class="author">Project 09</span>
+                    <div class="title">RiddleRush</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thumbnails -->
+        <div class="thumbnails">
+            <div class="thumbnail-item active" data-index="0">
+                <img src="abc-garden.jpg" alt="ABC Garden" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=01'">
+            </div>
+            <div class="thumbnail-item" data-index="1">
+                <img src="math-guru.jpg" alt="Math Guru" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=02'">
+            </div>
+            <div class="thumbnail-item" data-index="2">
+                <img src="multiply-mate.jpg" alt="Multiply Mate" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=03'">
+            </div>
+            <div class="thumbnail-item" data-index="3">
+                <img src="bio-quizzed.jpg" alt="Bio Quizzed" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=04'">
+            </div>
+            <div class="thumbnail-item" data-index="4">
+                <img src="word-hunt.jpg" alt="Word Hunt" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=05'">
+            </div>
+            <div class="thumbnail-item" data-index="5">
+                <img src="recall-race.jpg" alt="Recall Race" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=06'">
+            </div>
+            <div class="thumbnail-item" data-index="6">
+                <img src="tile-shuffle.jpg" alt="Tile Shuffle" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=07'">
+            </div>
+            <div class="thumbnail-item" data-index="7">
+                <img src="word-scramble.jpg" alt="Word Scramble" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=08'">
+            </div>
+            <div class="thumbnail-item" data-index="8">
+                <img src="riddlerush.png" alt="RiddleRush" onerror="this.src='https://placehold.co/150x200/121212/FF4400?text=09'">
+            </div>
+        </div>
+
+        <div class="arrows">
+            <button id="prev" aria-label="Previous"><i class="fas fa-arrow-left"></i></button>
+            <button id="next" aria-label="Next"><i class="fas fa-arrow-right"></i></button>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Custom Cursor & Magnetic Elements (Synced) ---
+            const cursorDot = document.getElementById('cursor-dot');
+            const cursorOutline = document.getElementById('cursor-outline');
+            const magneticEls = document.querySelectorAll('.magnetic-el');
+
+            if (window.matchMedia("(hover: hover)").matches) {
+                window.addEventListener('mousemove', (e) => {
+                    gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                    gsap.to(cursorOutline, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power2.out" });
+                });
+
+                magneticEls.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        gsap.to(cursorOutline, { scale: 1.5, backgroundColor: 'rgba(255, 68, 0, 0.1)', duration: 0.3 });
+                    });
+                    
+                    el.addEventListener('mouseleave', () => {
+                        gsap.to(cursorOutline, { scale: 1, backgroundColor: 'transparent', x: 0, y: 0, duration: 0.3 });
+                        gsap.to(el, { x: 0, y: 0, duration: 0.5 });
+                    });
+
+                    el.addEventListener('mousemove', (e) => {
+                        const rect = el.getBoundingClientRect();
+                        const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+                        const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+                        gsap.to(el, { x: x, y: y, duration: 0.5, ease: 'power2.out' });
+                    });
+                });
+            }
+
+            // --- Mobile Menu ---
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const close = document.getElementById('close-menu');
+            const links = document.querySelectorAll('.mobile-link');
+            
+            const toggle = () => menu.classList.toggle('translate-x-full');
+            
+            if(btn) btn.addEventListener('click', toggle);
+            if(close) close.addEventListener('click', toggle);
+            links.forEach(link => link.addEventListener('click', toggle));
+
+            // --- Carousel Logic ---
+            const list = document.querySelector('.carousel .list');
+            const items = document.querySelectorAll('.carousel .list .item');
+            const thumbnails = document.querySelectorAll('.thumbnails .thumbnail-item');
+            const prevBtn = document.getElementById('prev');
+            const nextBtn = document.getElementById('next');
+            let currentIndex = 0;
+            let autoSlideInterval;
+
+            function showSlide(index) {
+                // Wrap index
+                if (index >= items.length) index = 0;
+                if (index < 0) index = items.length - 1;
+                
+                currentIndex = index;
+
+                // Update Items
+                items.forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                // Update Thumbnails
+                thumbnails.forEach((thumb, i) => {
+                    if (i === index) {
+                        thumb.classList.add('active');
+                        // Smoothly scroll thumbnail into view
+                        thumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+
+                resetAutoSlide();
+            }
+
+            function nextSlide() { showSlide(currentIndex + 1); }
+            function prevSlide() { showSlide(currentIndex - 1); }
+
+            function resetAutoSlide() {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = setInterval(nextSlide, 6000); // Slightly longer reading time
+            }
+
+            // Event Listeners
+            if(nextBtn) nextBtn.addEventListener('click', nextSlide);
+            if(prevBtn) prevBtn.addEventListener('click', prevSlide);
+
+            thumbnails.forEach((thumb, index) => {
+                thumb.addEventListener('click', () => showSlide(index));
+            });
+
+            // Keyboard Navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+            });
+
+            // Init
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>

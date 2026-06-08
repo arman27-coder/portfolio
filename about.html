@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="About Arman Sayyad - Developer, AI & Data Science Student, Artist, and Writer.">
+    <title>About | Arman</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Grotesk:wght@300;400;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#050505',
+                        surface: '#121212',
+                        accent: '#FF4400',
+                        textMain: '#F3F4F6',
+                        textMuted: '#9CA3AF'
+                    },
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Core Reset & Scrollbar */
+        ::selection { background: #FF4400; color: #050505; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF4400; }
+
+        body {
+            background-color: #050505; color: #F3F4F6;
+            overflow-x: hidden; cursor: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Re-enable default cursor for touch devices */
+        @media (hover: none) and (pointer: coarse), (max-width: 768px) { 
+            body { cursor: auto; } 
+        }
+
+        /* Ambient Backgrounds */
+        .noise-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            pointer-events: none; z-index: 50; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+        }
+
+        /* Custom Cursor */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        .cursor-dot { width: 6px; height: 6px; background-color: #FF4400; }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(255, 68, 0, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s; mix-blend-mode: difference;
+        }
+        @media (hover: none) and (pointer: coarse), (max-width: 768px) { 
+            .cursor-dot, .cursor-outline { display: none !important; } 
+        }
+
+        /* Utilities */
+        .text-outline-stroke {
+            color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2); transition: all 0.3s ease;
+        }
+        @media (hover: hover) {
+            .text-outline-stroke:hover { -webkit-text-stroke: 1px #FF4400; color: rgba(255, 68, 0, 0.1); }
+        }
+
+        .floating-nav {
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(18, 18, 18, 0.7); border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bento-card {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease, border-color 0.4s ease;
+        }
+        @media (hover: hover) {
+            .bento-card:hover { transform: translateY(-4px); background: #1a1a1a; border-color: rgba(255, 68, 0, 0.3); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent selection:text-base relative min-h-[100dvh]">
+
+    <!-- Texture, Global Grid & Ambient Lights -->
+    <div class="fixed inset-0 z-0 pointer-events-none bg-grid opacity-60"></div>
+    <div class="fixed top-[-10%] left-[-10%] w-[80vw] md:w-[50vw] h-[80vw] md:h-[50vw] bg-accent/5 rounded-full blur-[100px] md:blur-[150px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[80vw] md:w-[50vw] h-[80vw] md:h-[50vw] bg-white/5 rounded-full blur-[100px] md:blur-[150px] pointer-events-none z-0"></div>
+    <div class="noise-bg"></div>
+    
+    <!-- Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 w-[92%] md:w-[90%] max-w-5xl z-40 rounded-full floating-nav px-5 py-3 lg:py-4 flex justify-between items-center gs-reveal">
+        <a href="index.html" class="font-display font-bold text-lg md:text-xl tracking-wide text-white hover:text-accent transition-colors magnetic-el">
+            <span class="magnetic-text inline-block">ARMAN<span class="text-accent">.</span></span>
+        </a>
+        
+        <!-- Desktop Links -->
+        <div class="hidden md:flex gap-8 items-center font-mono text-xs lg:text-sm uppercase tracking-widest text-textMuted">
+            <a href="index.html" class="hover:text-white transition-colors magnetic-el"><span class="magnetic-text inline-block">Home</span></a>
+            <a href="project.html" class="hover:text-white transition-colors magnetic-el"><span class="magnetic-text inline-block">Work</span></a>
+            <a href="about.html" class="text-white border-b border-accent pb-1 magnetic-el"><span class="magnetic-text inline-block">About</span></a>
+            <a href="artwork.html" class="hover:text-white transition-colors magnetic-el"><span class="magnetic-text inline-block">Artwork</span></a>
+        </div>
+
+        <a href="contacts.html" class="hidden md:inline-flex items-center justify-center px-5 py-2.5 bg-white text-base font-mono text-xs lg:text-sm font-bold rounded-full hover:bg-accent hover:text-white transition-all magnetic-el">
+            <span class="magnetic-text inline-block">LET'S TALK</span>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="md:hidden text-white text-xl p-2 focus:outline-none" id="mobile-menu-btn" aria-label="Open Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-base z-50 transform translate-x-full transition-transform duration-500 flex flex-col justify-center items-center gap-10">
+        <button id="close-menu" class="absolute top-6 right-6 p-4 text-white text-3xl focus:outline-none" aria-label="Close Menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="index.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">Home</a>
+        <a href="project.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">Work</a>
+        <a href="about.html" class="font-display text-5xl text-accent mobile-link transition-colors">About</a>
+        <a href="contacts.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">Contact</a>
+    </div>
+
+    <!-- Content Section -->
+    <section class="min-h-[100dvh] pt-28 md:pt-32 pb-16 md:pb-20 px-4 sm:px-6 flex items-center relative overflow-hidden">
+        
+        <!-- Giant Watermark -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[18vw] md:text-[15vw] font-display font-bold text-white/[0.02] whitespace-nowrap pointer-events-none select-none z-0">
+            IDENTITY
+        </div>
+
+        <div class="container mx-auto max-w-7xl relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+            
+            <!-- Left: Text Content -->
+            <div class="md:col-span-7 order-2 md:order-1 gs-reveal mt-4 md:mt-0">
+                <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                    <div class="w-8 md:w-12 h-[1px] bg-accent"></div>
+                    <p class="font-mono text-textMuted tracking-[0.2em] text-[10px] md:text-xs lg:text-sm uppercase">Who Am I?</p>
+                </div>
+                
+                <h1 class="font-display text-[clamp(3rem,8vw,6rem)] font-bold mb-6 md:mb-8 leading-[0.9] tracking-tighter text-white">
+                    ARMAN <br><span class="text-outline-stroke">SAYYAD</span>
+                </h1>
+                
+                <div class="space-y-4 md:space-y-6 text-textMuted font-sans text-sm sm:text-base lg:text-lg max-w-2xl">
+                    <p>
+                        I'm a 22-year-old B.Tech final-year student specializing in <strong class="text-white font-medium">Artificial Intelligence & Data Science</strong>, based in Dharashiv, Maharashtra.
+                    </p>
+                    <p>
+                        My journey is a blend of logic and imagination. I bridge the gap between complex algorithms and visual storytelling. Whether it's crafting a pixel-perfect <strong class="text-white font-medium">Flutter application</strong> or sketching a detailed portrait, I am driven by an unrelenting desire to create and innovate.
+                    </p>
+                    <p>
+                        Beyond the screen and canvas, I share pieces of my mind as a relatable quote writer. You can find my musings on my Instagram page, <a href="https://www.instagram.com/silentverses.__/" target="_blank" class="text-white font-medium hover:text-accent hover:underline transition-colors">@silentverses.__</a>, where I weave words that resonate with everyday emotions and the quiet moments of life.
+                    </p>
+                    
+                    <!-- Tech & Skills Tags -->
+                    <div class="mt-8 md:mt-10">
+                        <h4 class="font-mono text-[10px] md:text-xs lg:text-sm text-white uppercase mb-3 md:mb-4 tracking-widest">Technical & Creative Arsenal</h4>
+                        <div class="flex flex-wrap gap-2 md:gap-3">
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-surface border border-white/5 rounded-md font-mono text-[10px] md:text-xs lg:text-sm text-textMuted flex items-center gap-1.5 md:gap-2"><i class="fas fa-code text-accent"></i> Flutter & Dart</span>
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-surface border border-white/5 rounded-md font-mono text-[10px] md:text-xs lg:text-sm text-textMuted flex items-center gap-1.5 md:gap-2"><i class="fas fa-database text-accent"></i> Firebase</span>
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-surface border border-white/5 rounded-md font-mono text-[10px] md:text-xs lg:text-sm text-textMuted flex items-center gap-1.5 md:gap-2"><i class="fas fa-globe text-accent"></i> HTML5 / CSS3 / JS</span>
+                            <span class="px-3 py-1.5 md:px-4 md:py-2 bg-surface border border-white/5 rounded-md font-mono text-[10px] md:text-xs lg:text-sm text-textMuted flex items-center gap-1.5 md:gap-2"><i class="fas fa-palette text-accent"></i> Sketch Artist</span>
+                            <a href="https://www.instagram.com/silentverses.__/" target="_blank" class="px-3 py-1.5 md:px-4 md:py-2 bg-surface border border-white/5 rounded-md font-mono text-[10px] md:text-xs lg:text-sm text-textMuted flex items-center gap-1.5 md:gap-2 hover:border-accent hover:text-white transition-colors cursor-pointer"><i class="fab fa-instagram text-accent"></i> @silentverses.__</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 md:mt-12 flex gap-4 md:gap-6 items-center">
+                    <a href="index.html#contacts" class="px-6 py-3 md:px-8 md:py-4 bg-white text-base font-bold rounded-full hover:bg-accent hover:text-white transition-all duration-300 font-mono text-[10px] md:text-xs lg:text-sm tracking-wider shadow-xl magnetic-el inline-flex items-center gap-2 md:gap-3">
+                        <span class="magnetic-text inline-block">GET IN TOUCH <i class="fas fa-arrow-right"></i></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Visual/Socials (Bento Card Style) -->
+            <div class="md:col-span-5 order-1 md:order-2 gs-reveal">
+                <div class="bento-card w-full aspect-auto md:aspect-[4/5] bg-surface rounded-3xl p-5 md:p-6 lg:p-8 border border-white/5 relative overflow-hidden flex flex-col justify-between group">
+                    
+                    <!-- Ambient Inner Glow -->
+                    <div class="absolute -right-20 -top-20 w-48 h-48 md:w-64 md:h-64 bg-accent/10 rounded-full blur-[60px] md:blur-[80px] group-hover:bg-accent/20 transition-all duration-700 pointer-events-none"></div>
+                    
+                    <!-- Top Section: Header -->
+                    <div class="flex justify-between items-start relative z-10 mb-6 md:mb-0">
+                        <div class="font-mono text-[10px] md:text-xs tracking-widest text-textMuted uppercase flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse"></span> Online
+                        </div>
+                        <i class="fas fa-fingerprint text-white/10 text-2xl md:text-3xl"></i>
+                    </div>
+
+                    <!-- Middle Section: Visual Placeholder -->
+                    <div class="flex-grow flex items-center justify-center relative z-10 my-4 md:my-8">
+                         <div class="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border border-white/10 bg-base flex items-center justify-center group-hover:scale-105 transition-transform duration-500 shadow-2xl relative overflow-hidden">
+                             <!-- Placeholder for actual portrait -->
+                             <i class="fas fa-user-astronaut text-4xl md:text-5xl lg:text-6xl text-white/20 group-hover:text-accent transition-colors duration-500"></i>
+                             
+                             <!-- Scanning line effect -->
+                             <div class="absolute top-0 left-0 w-full h-[2px] bg-accent/50 animate-[scan_3s_ease-in-out_infinite]"></div>
+                         </div>
+                    </div>
+                    <style>
+                        @keyframes scan {
+                            0%, 100% { top: 0; opacity: 0; }
+                            50% { opacity: 1; }
+                            90% { top: 100%; opacity: 0; }
+                        }
+                    </style>
+                    
+                    <!-- Bottom Section: Info & Socials -->
+                    <div class="relative z-10 border-t border-white/5 pt-5 md:pt-6 mt-4 md:mt-auto">
+                        <h3 class="font-display text-lg md:text-xl lg:text-2xl font-bold text-white mb-1">Arman Sayyad</h3>
+                        <!-- Updated title to include writing -->
+                        <p class="font-sans text-xs md:text-sm text-textMuted mb-4 md:mb-6">Creative Developer & Writer</p>
+                        
+                        <div class="flex gap-3 md:gap-4">
+                            <a href="https://www.linkedin.com/in/arman-sayyad-292006321/" target="_blank" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-base border border-white/5 flex items-center justify-center text-textMuted hover:text-white hover:border-white hover:bg-white/5 transition-all magnetic-el">
+                                <span class="magnetic-text inline-block"><i class="fab fa-linkedin-in text-xs md:text-sm"></i></span>
+                            </a>
+                            <a href="https://www.instagram.com/silentverses.__/" target="_blank" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-base border border-white/5 flex items-center justify-center text-textMuted hover:text-accent hover:border-accent hover:bg-accent/10 transition-all magnetic-el">
+                                <span class="magnetic-text inline-block"><i class="fab fa-instagram text-xs md:text-sm"></i></span>
+                            </a>
+                            <a href="https://github.com/arman27-coder" target="_blank" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-base border border-white/5 flex items-center justify-center text-textMuted hover:text-white hover:border-white hover:bg-white/5 transition-all magnetic-el">
+                                <span class="magnetic-text inline-block"><i class="fab fa-github text-xs md:text-sm"></i></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Custom Cursor & Magnetic Elements ---
+            const cursorDot = document.getElementById('cursor-dot');
+            const cursorOutline = document.getElementById('cursor-outline');
+            const magneticEls = document.querySelectorAll('.magnetic-el');
+
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                window.addEventListener('mousemove', (e) => {
+                    gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                    gsap.to(cursorOutline, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power2.out" });
+                });
+
+                magneticEls.forEach(el => {
+                    const text = el.querySelector('.magnetic-text');
+
+                    el.addEventListener('mouseenter', () => {
+                        gsap.to(cursorOutline, { scale: 1.5, backgroundColor: 'rgba(255, 68, 0, 0.1)', duration: 0.3 });
+                    });
+                    
+                    el.addEventListener('mouseleave', () => {
+                        gsap.to(cursorOutline, { scale: 1, backgroundColor: 'transparent', x: 0, y: 0, duration: 0.3 });
+                        gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: 'power3.out' });
+                        if(text) gsap.to(text, { x: 0, y: 0, duration: 0.5, ease: 'power3.out' });
+                    });
+
+                    el.addEventListener('mousemove', (e) => {
+                        const rect = el.getBoundingClientRect();
+                        const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+                        const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+                        
+                        gsap.to(el, { x: x, y: y, duration: 0.5, ease: 'power2.out' });
+                        if(text) gsap.to(text, { x: x * 0.5, y: y * 0.5, duration: 0.5, ease: 'power2.out' });
+                    });
+                });
+            }
+
+            // --- 2. GSAP Reveal Animations ---
+            const revealElements = document.querySelectorAll('.gs-reveal');
+            
+            // Simple sequential reveal for elements currently on screen
+            gsap.fromTo(revealElements, 
+                { y: 50, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: "power3.out", delay: 0.1 }
+            );
+
+            // --- 3. Mobile Menu Logic ---
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('close-menu');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+
+            function toggleMenu() {
+                mobileMenu.classList.toggle('translate-x-full');
+            }
+
+            if(menuBtn) menuBtn.addEventListener('click', toggleMenu);
+            if(closeBtn) closeBtn.addEventListener('click', toggleMenu);
+            mobileLinks.forEach(link => link.addEventListener('click', toggleMenu));
+        });
+    </script>
+</body>
+</html>

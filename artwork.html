@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Explore Arman's artwork collection.">
+    <title>Artwork | Arman</title>
+    
+    <!-- Fonts: Premium Minimalist Selection -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Grotesk:wght@300;400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#050505',
+                        surface: '#121212',
+                        accent: '#FF4400',
+                        textMain: '#F3F4F6',
+                        textMuted: '#9CA3AF'
+                    },
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::selection {
+            background: #FF4400;
+            color: #050505;
+        }
+
+        body { 
+            background-color: #050505; 
+            color: #F3F4F6; 
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+            cursor: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Re-enable default cursor for touch devices */
+        @media (hover: none) and (pointer: coarse), (max-width: 768px) { 
+            body { cursor: auto; } 
+        }
+
+        /* --- Ambient Noise & Lighting (Using dvh for mobile fix) --- */
+        .noise-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            pointer-events: none; z-index: 50; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw; height: 60dvh;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            z-index: 0; pointer-events: none;
+        }
+
+        /* --- Custom Cursor --- */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        .cursor-dot { width: 6px; height: 6px; background-color: #FF4400; }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(255, 68, 0, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s; mix-blend-mode: difference;
+        }
+        @media (hover: none) and (pointer: coarse), (max-width: 768px) { 
+            .cursor-dot, .cursor-outline { display: none !important; } 
+        }
+
+        /* --- Floating Navigation --- */
+        .floating-nav {
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(5, 5, 5, 0.6); border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Cinematic Gallery Slider --- */
+        .carousel { width: 100vw; height: 100dvh; position: relative; overflow: hidden; z-index: 10; touch-action: pan-y; }
+        .carousel .list { position: relative; width: 100%; height: 100%; }
+        
+        .carousel .list .item {
+            position: absolute; inset: 0;
+            opacity: 0; pointer-events: none; z-index: 1;
+            transition: opacity 1s ease-in-out;
+        }
+        .carousel .list .item.active { opacity: 1; pointer-events: auto; z-index: 10; }
+
+        /* The Art Piece (Massive & Centered) */
+        .carousel .list .item img {
+            position: absolute;
+            top: 45%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: 100%; max-width: 85vw;
+            height: 75dvh;
+            object-fit: contain; /* Ensures nothing is cropped */
+            z-index: 2;
+            transition: transform 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+            filter: drop-shadow(0 25px 40px rgba(0,0,0,0.8));
+        }
+        .carousel .list .item.active img { transform: translate(-50%, -50%) scale(1); }
+
+        /* Gradient mask to ensure text readability at the bottom */
+        .bottom-shadow {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 45dvh;
+            background: linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0.7) 40%, transparent 100%);
+            z-index: 15; pointer-events: none;
+        }
+
+        /* Elegant Typography Layout (Bottom Left) */
+        .carousel .list .item .content {
+            position: absolute;
+            bottom: 150px; /* Above thumbnails */
+            left: 5%;
+            width: 90%; max-width: 700px;
+            z-index: 20;
+            transform: translateY(30px); opacity: 0;
+            transition: all 1s cubic-bezier(0.2, 1, 0.3, 1) 0.3s;
+        }
+        .carousel .list .item.active .content { transform: translateY(0); opacity: 1; }
+
+        .carousel .list .item .content .author { 
+            font-family: 'Space Grotesk', monospace; color: #FF4400; 
+            letter-spacing: 4px; font-size: 0.75rem; font-weight: 600; 
+            text-transform: uppercase; margin-bottom: 0.75rem; 
+        }
+        .carousel .list .item .content .title { 
+            font-family: 'Syne', sans-serif; font-weight: 800; 
+            font-size: clamp(2.5rem, 6vw, 5.5rem); color: white; 
+            line-height: 1; margin-bottom: 1rem; text-transform: uppercase; 
+            letter-spacing: -2px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .carousel .list .item .content .des { 
+            font-family: 'DM Sans', sans-serif; color: #D1D5DB; 
+            font-size: clamp(0.95rem, 2vw, 1.1rem); line-height: 1.6; max-width: 85%; 
+            font-weight: 300;
+        }
+
+        /* --- Edge Arrows (Museum Style) --- */
+        .arrows { 
+            position: absolute; top: 45%; left: 0; width: 100%; 
+            display: flex; 
+            justify-content: space-between ; 
+            transform: translateY(-50%); z-index: 30; pointer-events: none;
+            padding: 0 2rem;
+        }
+        .arrows button {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(255,255,255,0.03); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 1.2rem;
+            cursor: pointer; pointer-events: auto;
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        @media (hover: hover) {
+            .arrows button:hover { 
+                background: #FF4400; border-color: #FF4400; color: #050505; 
+                transform: scale(1.15); box-shadow: 0 0 20px rgba(255,68,0,0.4);
+            }
+        }
+
+        /* --- Minimal Thumbnails (Bottom Center) --- */
+        .thumbnails {
+            position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 0.75rem; z-index: 30; max-width: 90vw; 
+            overflow-x: auto; padding-bottom: 1rem;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .thumbnails::-webkit-scrollbar { display: none; }
+
+        .thumbnails .thumbnail-item {
+            width: 60px; height: 85px; flex-shrink: 0; cursor: pointer; opacity: 0.3;
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1); 
+            border-radius: 4px; overflow: hidden; background: #121212;
+            border: 1px solid transparent;
+        }
+        .thumbnails .thumbnail-item.active { 
+            opacity: 1; transform: translateY(-8px); 
+            border-color: #FF4400; box-shadow: 0 10px 20px rgba(255, 68, 0, 0.2); 
+        }
+        @media (hover: hover) {
+            .thumbnails .thumbnail-item:hover { opacity: 0.8; }
+            .thumbnails .thumbnail-item.active:hover, .thumbnails .thumbnail-item:hover img { filter: grayscale(0%); }
+        }
+        .thumbnails .thumbnail-item img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.4s; }
+        .thumbnails .thumbnail-item.active img { filter: grayscale(0%); }
+
+        .time-bar { position: absolute; top: 0; left: 0; height: 2px; background: rgba(255, 68, 0, 0.5); width: 0%; z-index: 100; }
+
+        /* =========================================
+           MOBILE OPTIMIZATIONS 
+           ========================================= */
+        @media (max-width: 768px) {
+            .carousel .list .item img { top: 38%; height: 55dvh; width: 90vw; }
+            .carousel .list .item .content { bottom: 80px; left: 5%; width: 90%; max-width: 100%; }
+            .carousel .list .item .content .title { margin-bottom: 0.5rem; }
+            .carousel .list .item .content .des { max-width: 100%; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+            .arrows { padding: 0 1rem; top: 38%; }
+            .arrows button { width: 45px; height: 45px; background: rgba(5,5,5,0.6); }
+            .thumbnails { display: none; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent selection:text-base relative">
+
+    <!-- Ambient Details -->
+    <div class="ambient-glow"></div>
+    <div class="noise-bg"></div>
+    
+    <!-- Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+    <div class="time-bar"></div>
+
+    <!-- Navigation (Synced & Responsive) -->
+    <nav class="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 w-[92%] md:w-[90%] max-w-5xl z-40 rounded-full floating-nav px-5 py-3 lg:py-4 flex justify-between items-center">
+        <a href="index.html" class="font-display font-bold text-lg md:text-xl tracking-wide text-white hover:text-accent transition-colors magnetic-el">
+            ARMAN<span class="text-accent">.</span>
+        </a>
+        
+        <div class="hidden md:flex gap-8 items-center font-mono text-xs lg:text-sm uppercase tracking-widest text-textMuted">
+            <a href="index.html" class="hover:text-white transition-colors magnetic-el">Home</a>
+            <a href="project.html" class="hover:text-white transition-colors magnetic-el">Work</a>
+            <a href="about.html" class="hover:text-white transition-colors magnetic-el">About</a>
+            <a href="artwork.html" class="text-white border-b border-accent pb-1 magnetic-el">Artwork</a>
+        </div>
+
+        <a href="contacts.html" class="hidden md:inline-flex items-center justify-center px-5 py-2.5 bg-white text-base font-mono text-xs lg:text-sm font-bold rounded-full hover:bg-accent hover:text-white transition-all magnetic-el">
+            LET'S TALK
+        </a>
+
+        <button class="md:hidden text-white text-xl p-2 focus:outline-none" id="mobile-menu-btn" aria-label="Open Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-base z-50 transform translate-x-full transition-transform duration-500 flex flex-col justify-center items-center gap-10">
+        <button id="close-menu" class="absolute top-6 right-6 p-4 text-white text-3xl focus:outline-none" aria-label="Close Menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="index.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">Home</a>
+        <a href="project.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">Work</a>
+        <a href="about.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">About</a>
+        <a href="artwork.html" class="font-display text-5xl text-accent mobile-link transition-colors">Artwork</a>
+        <a href="contacts.html" class="font-display text-5xl text-white hover:text-accent mobile-link transition-colors">Contact</a>
+    </div>
+
+    <!-- Artwork Carousel -->
+    <main class="carousel" role="region" aria-label="Artwork carousel">
+        <div class="bottom-shadow"></div>
+        <div class="list">
+            
+            <div class="item active" data-index="0">
+                <img src="img1.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Doraemon'" alt="Doraemon sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 01</div>
+                    <div class="title">Doraemon</div>
+                    <div class="des">A beloved robotic cat from the future, Doraemon uses his high-tech gadgets to help Nobita in this vibrant sketch capturing his playful charm.</div>
+                </div>
+            </div>
+            <div class="item" data-index="1">
+                <img src="img2.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Spider-Man'" alt="Spider-Man sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 02</div>
+                    <div class="title">Spider-Man</div>
+                    <div class="des">Swinging through the city, this dynamic Spider-Man sketch showcases his agility and iconic web-slinging pose from Marvel Comics.</div>
+                </div>
+            </div>
+            <div class="item" data-index="2">
+                <img src="img3.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Hunter+X+Hunter'" alt="Hunter X Hunter sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 03</div>
+                    <div class="title">Hunter X Hunter</div>
+                    <div class="des">This intricate sketch captures the adventurous spirit of the Hunter X Hunter series, highlighting its diverse characters and thrilling narrative.</div>
+                </div>
+            </div>
+            <div class="item" data-index="3">
+                <img src="img4.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Jujutsu+Kaisen'" alt="Jujutsu Kaisen sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 04</div>
+                    <div class="title">Jujutsu Kaisen</div>
+                    <div class="des">A striking depiction of Jujutsu Kaisen’s dark fantasy world, this sketch emphasizes the intense energy of its sorcerers battling cursed spirits.</div>
+                </div>
+            </div>
+            <div class="item" data-index="4">
+                <img src="img5.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Joker'" alt="Joker sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 05</div>
+                    <div class="title">Joker</div>
+                    <div class="des">The chaotic essence of Batman’s notorious villain shines in this chilling sketch, capturing the Joker’s maniacal grin and unpredictable nature.</div>
+                </div>
+            </div>
+            <div class="item" data-index="5">
+                <img src="img6.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Jujutsu+Trio'" alt="Jujutsu Kaisen Trio sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 06</div>
+                    <div class="title">Jujutsu Kaisen Trio</div>
+                    <div class="des">Featuring Yuji Itadori, Megumi Fushiguro, and Nobara Kugisaki, this sketch highlights the camaraderie and strength of Jujutsu Kaisen’s core trio.</div>
+                </div>
+            </div>
+            <div class="item" data-index="6">
+                <img src="img7.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Ash+%26+Pikachu'" alt="Ash & Pikachu sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 07</div>
+                    <div class="title">Ash & Pikachu</div>
+                    <div class="des">This heartwarming sketch captures the unbreakable bond between Pokémon trainer Ash Ketchum and his loyal partner Pikachu.</div>
+                </div>
+            </div>
+            <div class="item" data-index="7">
+                <img src="img8.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Shinchan'" alt="Shinchan sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 08</div>
+                    <div class="title">Shinchan</div>
+                    <div class="des">Shinchan’s mischievous antics come to life in this playful sketch, showcasing his cheeky personality from the beloved Japanese series.</div>
+                </div>
+            </div>
+            <div class="item" data-index="8">
+                <img src="img9.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Manga'" alt="Manga sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 09</div>
+                    <div class="title">Manga</div>
+                    <div class="des">A vibrant tribute to the art of manga, this sketch celebrates the dynamic storytelling and expressive style of Japanese comics.</div>
+                </div>
+            </div>
+            <div class="item" data-index="9">
+                <img src="img10.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Spider-Man'" alt="Spider-Man sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 10</div>
+                    <div class="title">Spider-Man</div>
+                    <div class="des">Another stunning portrayal of Spider-Man, this sketch emphasizes his acrobatic prowess and heroic spirit in a bold, dynamic pose.</div>
+                </div>
+            </div>
+            <div class="item" data-index="10">
+                <img src="img11.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Portrait'" alt="Person Who Forgot to Smile sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 11</div>
+                    <div class="title">Person Who Forgot to Smile</div>
+                    <div class="des">This emotive sketch portrays a melancholic figure, capturing the quiet depth of someone lost in thought or sorrow.</div>
+                </div>
+            </div>
+            <div class="item" data-index="11">
+                <img src="img12.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Skeleton'" alt="Skeleton with Phone sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 12</div>
+                    <div class="title">Skeleton with Phone</div>
+                    <div class="des">A whimsical take on modern life, this sketch humorously depicts a skeleton engrossed in their smartphone.</div>
+                </div>
+            </div>
+            <div class="item" data-index="12">
+                <img src="img13.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Statue'" alt="Statue of God sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 13</div>
+                    <div class="title">Statue of God</div>
+                    <div class="des">Inspired by Solo Leveling, this majestic sketch portrays a divine statue exuding power and mystery from the series’ epic world.</div>
+                </div>
+            </div>
+            <div class="item" data-index="13">
+                <img src="img14.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Donald+Duck'" alt="Donald Duck sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 14</div>
+                    <div class="title">Donald Duck</div>
+                    <div class="des">This lively sketch captures Donald Duck’s iconic temper and charm, a timeless Disney character in a classic pose.</div>
+                </div>
+            </div>
+            <div class="item" data-index="14">
+                <img src="img15.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Kakashi'" alt="Kakashi Hatake sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 15</div>
+                    <div class="title">Kakashi Hatake</div>
+                    <div class="des">The enigmatic ninja from Naruto, this sketch highlights Kakashi’s cool demeanor and signature Sharingan eye.</div>
+                </div>
+            </div>
+            <div class="item" data-index="15">
+                <img src="img16.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Cartoon+Ghost'" alt="Cartoon Ghost sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 16</div>
+                    <div class="title">Cartoon Ghost</div>
+                    <div class="des">A playful and spooky cartoon ghost, this sketch brings a fun, lighthearted vibe with its whimsical design.</div>
+                </div>
+            </div>
+            <div class="item" data-index="16">
+                <img src="img17.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Pikachu'" alt="Pikachu sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 17</div>
+                    <div class="title">Pikachu</div>
+                    <div class="des">The adorable Pokémon mascot, this sketch captures Pikachu’s electric energy and irresistible cuteness.</div>
+                </div>
+            </div>
+            <div class="item" data-index="17">
+                <img src="img18.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Bhabhi'" alt="Bhabhi sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 18</div>
+                    <div class="title">Bhabhi</div>
+                    <div class="des">A heartfelt portrait of my grandmother, this sketch radiates warmth, wisdom, and familial love through intricate details.</div>
+                </div>
+            </div>
+            <div class="item" data-index="18">
+                <img src="img19.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Killua'" alt="Killua Zoldyck sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 19</div>
+                    <div class="title">Killua Zoldyck</div>
+                    <div class="des">This sketch of Killua from Hunter X Hunter captures his confident smirk and lightning-fast assassin skills.</div>
+                </div>
+            </div>
+            <div class="item" data-index="19">
+                <img src="img20.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Zenitsu'" alt="Zenitsu Agatsuma sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 20</div>
+                    <div class="title">Zenitsu Agatsuma</div>
+                    <div class="des">From Demon Slayer, this sketch portrays Zenitsu’s nervous yet powerful persona, with a focus on his lightning abilities.</div>
+                </div>
+            </div>
+            <div class="item" data-index="20">
+                <img src="img21.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Gojo'" alt="Gojo Satoru sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 21</div>
+                    <div class="title">Gojo Satoru</div>
+                    <div class="des">The charismatic sorcerer from Jujutsu Kaisen, this sketch showcases Gojo’s confident aura and limitless power.</div>
+                </div>
+            </div>
+            <div class="item" data-index="21">
+                <img src="img22.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Einstein'" alt="Albert Einstein sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 22</div>
+                    <div class="title">Albert Einstein</div>
+                    <div class="des">This sketch captures the genius physicist’s thoughtful expression, reflecting his groundbreaking contributions to science.</div>
+                </div>
+            </div>
+            <div class="item" data-index="22">
+                <img src="img23.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Portrait'" alt="Mysterious Man sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 23</div>
+                    <div class="title">Mysterious Man</div>
+                    <div class="des">A contemplative portrait of an unnamed man, this sketch conveys depth and intrigue through its detailed shading.</div>
+                </div>
+            </div>
+            <div class="item" data-index="23">
+                <img src="img24.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Sardar+Patel'" alt="Sardar Vallabhbhai Patel sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 24</div>
+                    <div class="title">Sardar Vallabhbhai Patel</div>
+                    <div class="des">This powerful sketch honors India’s Iron Man, depicting his resolute expression and leadership in unifying the nation.</div>
+                </div>
+            </div>
+            <div class="item" data-index="24">
+                <img src="img25.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Vivekananda'" alt="Swami Vivekananda sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 25</div>
+                    <div class="title">Swami Vivekananda</div>
+                    <div class="des">A vibrant portrait of the spiritual leader, this sketch captures his inspiring presence and philosophical wisdom.</div>
+                </div>
+            </div>
+
+            <div class="item" data-index="25">
+                <img src="img26.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Killua'" alt="Killua Zoldyck sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 26</div>
+                    <div class="title">Killua Zoldyck</div>
+                    <div class="des">Another stunning depiction of Killua, this sketch emphasizes his electrifying energy and complex personality from Hunter X Hunter.</div>
+                </div>
+            </div>
+            <div class="item" data-index="26">
+                <img src="img27.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Charlie+Chaplin'" alt="Charlie Chaplin sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 27</div>
+                    <div class="title">Charlie Chaplin</div>
+                    <div class="des">This sketch of the legendary comedian captures the Tramp’s iconic charm and silent film-era humor.</div>
+                </div>
+            </div>
+            <div class="item" data-index="27">
+                <img src="img28.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Daksh'" alt="Daksh sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 28</div>
+                    <div class="title">Daksh</div>
+                    <div class="des">A tender portrait of a young child, this sketch radiates innocence and curiosity through its delicate details.</div>
+                </div>
+            </div>
+            <div class="item" data-index="28">
+                <img src="img29.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Mr+Bean'" alt="Mr. Bean sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 29</div>
+                    <div class="title">Mr. Bean</div>
+                    <div class="des">This playful sketch captures Mr. Bean’s quirky humor and expressive face, a nod to his comedic legacy.</div>
+                </div>
+            </div>
+            <div class="item" data-index="29">
+                <img src="img30.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Jack+Sparrow'" alt="Jack Sparrow sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 30</div>
+                    <div class="title">Jack Sparrow</div>
+                    <div class="des">The eccentric pirate from Pirates of the Caribbean, this sketch highlights Jack Sparrow’s sly grin and adventurous spirit.</div>
+                </div>
+            </div>
+            <div class="item" data-index="30">
+                <img src="img31.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Mahatma+Gandhi'" alt="Mahatma Gandhi sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 31</div>
+                    <div class="title">Mahatma Gandhi</div>
+                    <div class="des">This serene sketch of Gandhi reflects his philosophy of non-violence and his pivotal role in India’s independence.</div>
+                </div>
+            </div>
+            <div class="item" data-index="31">
+                <img src="img32.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Sukuna'" alt="Sukuna sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 32</div>
+                    <div class="title">Sukuna</div>
+                    <div class="des">The King of Curses from Jujutsu Kaisen, this sketch captures Sukuna’s menacing aura and dark power.</div>
+                </div>
+            </div>
+            <div class="item" data-index="32">
+                <img src="img33.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Eren+Yeager'" alt="Eren Yeager sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 33</div>
+                    <div class="title">Eren Yeager</div>
+                    <div class="des">From Attack on Titan, this sketch portrays Eren’s intense determination and complex journey as a titan shifter.</div>
+                </div>
+            </div>
+            <div class="item" data-index="33">
+                <img src="img34.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Kakashi'" alt="Kakashi Hatake sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 34</div>
+                    <div class="title">Kakashi Hatake</div>
+                    <div class="des">Another dynamic portrayal of Naruto’s Kakashi, this sketch emphasizes his strategic brilliance and calm demeanor.</div>
+                </div>
+            </div>
+            <div class="item" data-index="34">
+                <img src="img35.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Thomas+Shelby'" alt="Thomas Shelby sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 35</div>
+                    <div class="title">Thomas Shelby</div>
+                    <div class="des">The cunning leader from Peaky Blinders, this sketch captures Thomas Shelby’s sharp gaze and commanding presence.</div>
+                </div>
+            </div>
+            <div class="item" data-index="35">
+                <img src="img36.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Naruto'" alt="Naruto Uzumaki sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 36</div>
+                    <div class="title">Naruto Uzumaki</div>
+                    <div class="des">The spirited ninja from Naruto, this sketch showcases Naruto’s determination and iconic whisker-like marks.</div>
+                </div>
+            </div>
+            <div class="item" data-index="36">
+                <img src="img37.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Shinchan'" alt="Shinchan sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 37</div>
+                    <div class="title">Shinchan</div>
+                    <div class="des">Another lively sketch of Shinchan, capturing his humorous and mischievous personality in vibrant detail.</div>
+                </div>
+            </div>
+            <div class="item" data-index="37">
+                <img src="img38.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Tattoo'" alt="Card Tattoo sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 38</div>
+                    <div class="title">Card Tattoo</div>
+                    <div class="des">A creative tattoo design featuring playing cards, this sketch blends bold lines with intricate patterns for a striking effect.</div>
+                </div>
+            </div>
+            <div class="item" data-index="38">
+                <img src="img39.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=APJ+Kalam'" alt="APJ Abdul Kalam sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 39</div>
+                    <div class="title">APJ Abdul Kalam</div>
+                    <div class="des">This inspiring sketch of India’s beloved scientist and president captures his visionary spirit and dedication to education.</div>
+                </div>
+            </div>
+            <div class="item" data-index="39">
+                <img src="img40.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Tony+Stark'" alt="Tony Stark sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 40</div>
+                    <div class="title">Tony Stark</div>
+                    <div class="des">The genius behind Iron Man, this sketch portrays Tony Stark’s confident smirk and innovative brilliance.</div>
+                </div>
+            </div>
+            <div class="item" data-index="40">
+                <img src="img41.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Vespa'" alt="Vespa Scooter sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 41</div>
+                    <div class="title">Vespa Scooter</div>
+                    <div class="des">A sleek sketch of the iconic Vespa scooter, capturing its vintage charm and timeless Italian design.</div>
+                </div>
+            </div>
+            <div class="item" data-index="41">
+                <img src="img42.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Skull+Owl'" alt="Skull and Owl Tattoo sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 42</div>
+                    <div class="title">Skull and Owl Tattoo</div>
+                    <div class="des">This bold tattoo design combines a skull and owl, symbolizing wisdom and mortality in a striking artistic blend.</div>
+                </div>
+            </div>
+            <div class="item" data-index="42">
+                <img src="img43.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Spider-Man'" alt="Spider-Man sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 43</div>
+                    <div class="title">Spider-Man</div>
+                    <div class="des">A third vibrant depiction of Spider-Man, this sketch highlights his web-slinging action and heroic essence.</div>
+                </div>
+            </div>
+            <div class="item" data-index="43">
+                <img src="img44.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Skull'" alt="Skull sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 44</div>
+                    <div class="title">Skull</div>
+                    <div class="des">A hauntingly detailed skull sketch, showcasing intricate linework and a dark, gothic aesthetic.</div>
+                </div>
+            </div>
+            <div class="item" data-index="44">
+                <img src="img45.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Boy'" alt="Boy sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 45</div>
+                    <div class="title">Boy</div>
+                    <div class="des">This expressive sketch of a young boy captures a moment of quiet contemplation with delicate shading.</div>
+                </div>
+            </div>
+            <div class="item" data-index="45">
+                <img src="img46.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Swan'" alt="Swan sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 46</div>
+                    <div class="title">Swan</div>
+                    <div class="des">A graceful sketch of a swan, symbolizing elegance and serenity with its flowing lines and serene pose.</div>
+                </div>
+            </div>
+            <div class="item" data-index="46">
+                <img src="img47.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Ghost+Mask'" alt="Ghost Mask - Simon Riley sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 47</div>
+                    <div class="title">Ghost Mask - Simon Riley</div>
+                    <div class="des">This intense sketch of Simon “Ghost” Riley’s iconic mask from Call of Duty captures his mysterious and tactical persona.</div>
+                </div>
+            </div>
+            <div class="item" data-index="47">
+                <img src="img48.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Nature'" alt="Nature Painting sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 48</div>
+                    <div class="title">Nature Painting</div>
+                    <div class="des">A breathtaking sketch of a natural landscape, capturing the serene beauty of forests and mountains in vivid detail.</div>
+                </div>
+            </div>
+            <div class="item" data-index="48">
+                <img src="img49.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Ronaldo'" alt="Cristiano Ronaldo sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 49</div>
+                    <div class="title">Cristiano Ronaldo</div>
+                    <div class="des">This dynamic sketch of the football legend captures Ronaldo’s intensity and athletic prowess on the field.</div>
+                </div>
+            </div>
+            <div class="item" data-index="49">
+                <img src="img50.jpg" onerror="this.src='https://placehold.co/800x1200/121212/FF4400?text=Subhash+Bose'" alt="Subhash Chandra Bose sketch" loading="lazy">
+                <div class="content">
+                    <div class="author">SKETCH 50</div>
+                    <div class="title">Subhash Chandra Bose</div>
+                    <div class="des">A powerful tribute to Netaji, this sketch portrays his fierce determination and leadership in India’s freedom struggle.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="thumbnails">
+            <!-- Full List of 50 Thumbnails -->
+            <div class="thumbnail-item active" data-index="0"><img src="img1.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=1'" alt="Doraemon" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="1"><img src="img2.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=2'" alt="Spider-Man" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="2"><img src="img3.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=3'" alt="Hunter X Hunter" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="3"><img src="img4.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=4'" alt="Jujutsu Kaisen" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="4"><img src="img5.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=5'" alt="Joker" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="5"><img src="img6.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=6'" alt="Jujutsu Kaisen Trio" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="6"><img src="img7.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=7'" alt="Ash & Pikachu" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="7"><img src="img8.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=8'" alt="Shinchan" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="8"><img src="img9.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=9'" alt="Manga" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="9"><img src="img10.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=10'" alt="Spider-Man" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="10"><img src="img11.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=11'" alt="Portrait" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="11"><img src="img12.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=12'" alt="Skeleton" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="12"><img src="img13.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=13'" alt="Statue" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="13"><img src="img14.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=14'" alt="Donald Duck" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="14"><img src="img15.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=15'" alt="Kakashi" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="15"><img src="img16.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=16'" alt="Ghost" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="16"><img src="img17.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=17'" alt="Pikachu" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="17"><img src="img18.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=18'" alt="Bhabhi" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="18"><img src="img19.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=19'" alt="Killua" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="19"><img src="img20.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=20'" alt="Zenitsu" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="20"><img src="img21.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=21'" alt="Gojo" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="21"><img src="img22.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=22'" alt="Einstein" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="22"><img src="img23.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=23'" alt="Portrait" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="23"><img src="img24.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=24'" alt="Patel" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="24"><img src="img25.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=25'" alt="Vivekananda" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="25"><img src="img26.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=26'" alt="Killua" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="26"><img src="img27.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=27'" alt="Chaplin" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="27"><img src="img28.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=28'" alt="Daksh" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="28"><img src="img29.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=29'" alt="Mr Bean" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="29"><img src="img30.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=30'" alt="Jack Sparrow" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="30"><img src="img31.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=31'" alt="Gandhi" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="31"><img src="img32.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=32'" alt="Sukuna" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="32"><img src="img33.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=33'" alt="Eren" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="33"><img src="img34.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=34'" alt="Kakashi" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="34"><img src="img35.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=35'" alt="Shelby" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="35"><img src="img36.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=36'" alt="Naruto" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="36"><img src="img37.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=37'" alt="Shinchan" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="37"><img src="img38.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=38'" alt="Tattoo" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="38"><img src="img39.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=39'" alt="Kalam" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="39"><img src="img40.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=40'" alt="Stark" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="40"><img src="img41.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=41'" alt="Vespa" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="41"><img src="img42.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=42'" alt="Tattoo" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="42"><img src="img43.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=43'" alt="Spider-Man" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="43"><img src="img44.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=44'" alt="Skull" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="44"><img src="img45.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=45'" alt="Boy" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="45"><img src="img46.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=46'" alt="Swan" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="46"><img src="img47.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=47'" alt="Ghost" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="47"><img src="img48.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=48'" alt="Nature" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="48"><img src="img49.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=49'" alt="Ronaldo" loading="lazy"></div>
+            <div class="thumbnail-item" data-index="49"><img src="img50.jpg" onerror="this.src='https://placehold.co/100x150/121212/FF4400?text=50'" alt="Bose" loading="lazy"></div>
+        </div>
+
+        <div class="arrows">
+            <button id="prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button id="next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Custom Cursor & Magnetic Safe Logic ---
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                const dot = document.getElementById('cursor-dot');
+                const outline = document.getElementById('cursor-outline');
+                const magneticEls = document.querySelectorAll('.magnetic-el');
+
+                window.addEventListener('mousemove', e => {
+                    gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                    gsap.to(outline, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power2.out" });
+                });
+
+                magneticEls.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        gsap.to(outline, { scale: 1.5, backgroundColor: 'rgba(255, 68, 0, 0.1)', duration: 0.3 });
+                    });
+                    
+                    el.addEventListener('mouseleave', () => {
+                        gsap.to(outline, { scale: 1, backgroundColor: 'transparent', x: 0, y: 0, duration: 0.3 });
+                        gsap.to(el, { x: 0, y: 0, duration: 0.5 });
+                    });
+
+                    el.addEventListener('mousemove', (e) => {
+                        const rect = el.getBoundingClientRect();
+                        const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+                        const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+                        gsap.to(el, { x: x, y: y, duration: 0.5, ease: 'power2.out' });
+                    });
+                });
+            }
+
+            // --- Mobile Menu ---
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const close = document.getElementById('close-menu');
+            const links = document.querySelectorAll('.mobile-link');
+            
+            const toggle = () => menu.classList.toggle('translate-x-full');
+            
+            if(btn) btn.addEventListener('click', toggle);
+            if(close) close.addEventListener('click', toggle);
+            links.forEach(link => link.addEventListener('click', toggle));
+
+            // --- Carousel Logic ---
+            const carouselContainer = document.querySelector('.carousel');
+            const items = document.querySelectorAll('.carousel .list .item');
+            const thumbnails = document.querySelectorAll('.thumbnails .thumbnail-item');
+            const prevBtn = document.getElementById('prev');
+            const nextBtn = document.getElementById('next');
+            const timeBar = document.querySelector('.time-bar');
+            
+            let itemActive = 0;
+            let countItem = items.length;
+            
+            // Relaxed interval so user can appreciate the art
+            let refreshInterval = setInterval(() => { nextBtn.click() }, 8000);
+
+            function showSlider() {
+                // Remove old active
+                let itemActiveOld = document.querySelector('.carousel .list .item.active');
+                let thumbnailActiveOld = document.querySelector('.thumbnails .thumbnail-item.active');
+                if(itemActiveOld) itemActiveOld.classList.remove('active');
+                if(thumbnailActiveOld) thumbnailActiveOld.classList.remove('active');
+
+                // Set new active
+                items[itemActive].classList.add('active');
+                if(thumbnails[itemActive]) thumbnails[itemActive].classList.add('active');
+                
+                // Scroll Thumbnail into view smoothly
+                if(thumbnails[itemActive] && window.innerWidth > 768) {
+                    thumbnails[itemActive].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+
+                // Reset Timer
+                clearInterval(refreshInterval);
+                refreshInterval = setInterval(() => { nextBtn.click() }, 8000);
+                
+                // Animate Time Bar
+                if(timeBar) {
+                    timeBar.style.width = '0%';
+                    gsap.to(timeBar, { width: '100%', duration: 8, ease: 'linear' });
+                }
+            }
+
+            if(nextBtn) {
+                nextBtn.onclick = function() {
+                    itemActive = itemActive + 1;
+                    if (itemActive >= countItem) itemActive = 0;
+                    showSlider();
+                }
+            }
+
+            if(prevBtn) {
+                prevBtn.onclick = function() {
+                    itemActive = itemActive - 1;
+                    if (itemActive < 0) itemActive = countItem - 1;
+                    showSlider();
+                }
+            }
+
+            thumbnails.forEach((thumbnail, index) => {
+                thumbnail.addEventListener('click', () => {
+                    itemActive = index;
+                    showSlider();
+                })
+            });
+            
+            // --- Swipe Support for Mobile & Tablets ---
+            let startX = 0;
+            let endX = 0;
+
+            carouselContainer.addEventListener('touchstart', (e) => {
+                startX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            carouselContainer.addEventListener('touchend', (e) => {
+                endX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+
+            function handleSwipe() {
+                const swipeThreshold = 50; // Minimum distance to trigger swipe
+                if (startX - endX > swipeThreshold) {
+                    // Swiped Left
+                    nextBtn.click();
+                } else if (endX - startX > swipeThreshold) {
+                    // Swiped Right
+                    prevBtn.click();
+                }
+            }
+
+            // Keyboard Nav
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextBtn.click();
+                if (e.key === 'ArrowLeft') prevBtn.click();
+            });
+
+            // Start initial animation
+            showSlider();
+        });
+    </script>
+</body>
+</html>
